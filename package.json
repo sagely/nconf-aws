@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "async": "0.2.x",
-    "aws-sdk": "1.12.0",
+    "aws-sdk": "1.12.0"
   },
   "devDependencies": {
     "nconf": "0.6.x"
