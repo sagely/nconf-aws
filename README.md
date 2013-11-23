@@ -9,6 +9,10 @@ Since this is currently a private repository, the module requires authentication
 
     $ npm install git+https://github.com/TeamPraxis/nconf-aws.git
 
+## Configuration
+
+This module uses the AWS SDK, so it is expected that the SDK is configured globally using the `AWS.config` object.
+
 ## Usage
 
 There are two stores included with this module. The `awsinstance` store will load properties from the AWS dynamic metadata document (`/latest/dynamic/instance-identity/document`) with an optional whitelist parameter.
