@@ -101,17 +101,24 @@ AWSS3.prototype.load = function(callback) {
   var self = this;
 
   async.waterfall([
-    // use meta to retrieve the region
+    // use meta to retrieve the region if not already set
     function(callback) {
-      var meta = new AWS.MetadataService();
-      meta.request('/latest/dynamic/instance-identity/document', callback);
+      if (!AWS.config.region && !nconf.get('region')) {
+        var meta = new AWS.MetadataService();
+        meta.request('/latest/dynamic/instance-identity/document', callback);
+      } else {
+        callback(null);
+      }
     },
     // try to load from S3
     function(body, callback) {
-      var data = JSON.parse(body);
+      var data = {};
+      if (body) {
+        data = JSON.parse(body);
+      }
       var s3 = new AWS.S3({
         apiVersion: '2006-03-01',
-        region: nconf.get('region') || data.region
+        region: AWS.config.region || nconf.get('region') || data.region
       });
 
       s3.getObject({ Bucket: self.bucket, Key: self.key }, callback);
