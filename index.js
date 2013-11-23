@@ -126,7 +126,12 @@ AWSS3.prototype.load = function(callback) {
   ], function(err, s3data) {
     // ignore errors and only load it if it's available
     if (!err && s3data) {
-      self.store = self.format.parse(s3data.Body.toString());
+      try {
+        self.store = self.format.parse(s3data.Body.toString());
+      } catch (ex) {
+        callback(new Error("Error parsing configuration file: [" + self.bucket + ': ' + self.key + '].'));
+        return;
+      }
     }
     callback(null, self.store);
   });
