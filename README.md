@@ -3,6 +3,12 @@ nconf-aws
 
 NConf plugin for AWS
 
+## Installation
+
+Since this is currently a private repository, the module requires authentication to be installed.
+
+    $ npm install git+https://github.com/TeamPraxis/nconf-aws.git
+
 ## Usage
 
 There are two stores included with this module. The `awsinstance` store will load properties from the AWS dynamic metadata document (`/latest/dynamic/instance-identity/document`) with an optional whitelist parameter.
