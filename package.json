@@ -1,7 +1,7 @@
 {
   "name": "nconf-aws",
   "description": "NConf plugin for AWS",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "keywords": ["configuration", "aws", "nconf", "s3"],
   "author": {
     "name": "Keith Hamasaki",

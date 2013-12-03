@@ -1,9 +1,10 @@
 /*
  * NConf storage engine that retrieves data from AWS.
  *
- * Two storage engines are provided:
+ * Three storage engines are provided:
  *  - awsinstance: loads from the dynamic AWS instance metadata.
  *  - awss3: loads from a specified AWS S3 object.
+ *  - awsec2tag: loads from AWS EC2 tags for the current instance.
  */
 var nconf = require('nconf'),
   util = require('util'),
@@ -65,7 +66,7 @@ AWSInstance.prototype.load = function(callback) {
 AWSInstance.prototype.loadSync = null;
 
 //-------------------------------------------------------------------------------------//
-// AWSInstance store - read data from the specified S3 object.
+// AWSS3 store - read data from the specified S3 object.
 //-------------------------------------------------------------------------------------//
 
 /**
@@ -141,3 +142,77 @@ AWSS3.prototype.load = function(callback) {
  * Delete loadSync so nconf.load doesn't try to use it.
  **/
 AWSS3.prototype.loadSync = null;
+
+//-------------------------------------------------------------------------------------//
+// AWSEC2Tag store - read data from the specified EC2 tags.
+//-------------------------------------------------------------------------------------//
+
+/**
+ * Store that reads data from AWS EC2 tags on the current instance.
+ **/
+var AWSEC2Tag = exports.AWSEC2Tag = function(options) {
+  Memory.call(this, options);
+  options = options || {};
+  this.type = 'awsec2tag';
+  this.readOnly = false;
+  this.whitelist = options.whitelist || [];
+  this.prefix = options.prefix || '';
+  if (options instanceof Array) {
+    this.whitelist = options;
+  }
+};
+
+// Inherit from the Memory store
+util.inherits(AWSEC2Tag, Memory);
+
+// set this on nconf so it knows how to find us
+nconf.Awstag = AWSEC2Tag;
+
+/**
+ * Load the data from the AWS EC2 tags into the store.
+ **/
+AWSEC2Tag.prototype.load = function(callback) {
+  var self = this;
+
+  async.waterfall([
+    // use meta to retrieve the region and instance ID
+    function(callback) {
+      var meta = new AWS.MetadataService();
+      meta.request('/latest/dynamic/instance-identity/document', callback);
+    },
+    // try to load from the tag service
+    function(body, callback) {
+      var data = {};
+      if (body) {
+        data = JSON.parse(body);
+      }
+      var ec2 = new AWS.EC2({
+        apiVersion: '2013-10-01',
+        region: data.region
+      });
+
+      ec2.describeTags({
+        Filters: [
+          { Name: "resource-id", Values: [ data.instanceId ] },
+          { Name: "resource-type", Values: [ "instance" ] }
+        ]
+      }, callback);
+    }
+  ], function(err, data) {
+    // ignore errors and only load it if it's available
+    if (!err && data) {
+      data.Tags.filter(function(tag) {
+        return !self.whitelist.length || self.whitelist.indexOf(tag.Key) !== -1;
+      }).forEach(function (tag) {
+        self.set(self.prefix + tag.Key, tag.Value);
+      });
+    }
+    callback(null, self.store);
+  });
+};
+
+/**
+ * Delete loadSync so nconf.load doesn't try to use it.
+ **/
+AWSEC2Tag.prototype.loadSync = null;
+
