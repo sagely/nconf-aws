@@ -166,7 +166,7 @@ var AWSEC2Tag = exports.AWSEC2Tag = function(options) {
 util.inherits(AWSEC2Tag, Memory);
 
 // set this on nconf so it knows how to find us
-nconf.Awstag = AWSEC2Tag;
+nconf.Awsec2tag = AWSEC2Tag;
 
 /**
  * Load the data from the AWS EC2 tags into the store.
