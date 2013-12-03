@@ -108,7 +108,7 @@ AWSS3.prototype.load = function(callback) {
         var meta = new AWS.MetadataService();
         meta.request('/latest/dynamic/instance-identity/document', callback);
       } else {
-        callback(null);
+        callback(null, null);
       }
     },
     // try to load from S3
