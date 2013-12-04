@@ -25,6 +25,7 @@ var AWSInstance = exports.AWSInstance = function(options) {
   options = options || {};
   this.type = 'awsinstance';
   this.readOnly = false;
+  this.prefix = options.prefix || '';
   this.whitelist = options.whitelist || [];
   if (options instanceof Array) {
     this.whitelist = options;
@@ -52,7 +53,7 @@ AWSInstance.prototype.load = function(callback) {
         Object.keys(data).filter(function (key) {
           return !self.whitelist.length || self.whitelist.indexOf(key) !== -1;
         }).forEach(function (key) {
-          self.set(key, data[key]);
+          self.set(self.prefix + key, data[key]);
         });
       }
 
