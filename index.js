@@ -1,3 +1,6 @@
+/*jshint node: true */
+'use strict';
+
 /*
  * NConf storage engine that retrieves data from AWS.
  *
