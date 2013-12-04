@@ -15,7 +15,7 @@ This module uses the AWS SDK, so it is expected that the SDK is configured globa
 
 ## Usage
 
-There are two stores included with this module. The `awsinstance` store will load properties from the AWS dynamic metadata document (`/latest/dynamic/instance-identity/document`) with an optional whitelist parameter.
+There are three stores included with this module. The `awsinstance` store will load properties from the AWS dynamic metadata document (`/latest/dynamic/instance-identity/document`) with an optional `whitelist` parameter. You can also specify a `prefix` parameter that will prepend a prefix to properties as they are loaded into nconf.
 
 ``` js
   var nconf = require('nconf');
@@ -32,7 +32,15 @@ The `awss3` store will load configuration data from the specified S3 object. The
   
   nconf.use('awss3', { bucket: 'mybucket', key: 'path/to/file.json' });
 ```
+The `awsec2tag` store will load EC2 tags from the current EC2 instance. Like the `awsinstance` store it has optional `whitelist` and `prefix` parameters.
 
-Note that neither of these stores loads synchronously, so for both you must call `nconf.load` with a callback in order to use them.
+``` js
+  var nconf  = require('nconf');
+  require('nconf-aws')
+    
+  nconf.use('awsec2tag', { whitelist: [ 'Name' ], prefix: 'ec2_' });
+```
+
+Note that none of these stores loads synchronously, so you must call `nconf.load` with a callback in order to use them.
 
 #### Author: [Keith Hamasaki](http://www.goonies3.com)
