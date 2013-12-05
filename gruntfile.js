@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -7,9 +9,34 @@ module.exports = function(grunt) {
         curly: true,
         eqeqeq: true,
         eqnull: true,
+        globalstrict: true,
         node: true
       },
-      all: ['*.js']
+      pkg: {
+        files: { src: [ '*.js' ] }
+      },
+      test: {
+        options: {
+          // jasmine globals
+          globals: {
+            jasmine    : false,
+            isCommonJS : false,
+            exports    : false,
+            spyOn      : false,
+            it         : false,
+            xit        : false,
+            expect     : false,
+            runs       : false,
+            waits      : false,
+            waitsFor   : false,
+            beforeEach : false,
+            afterEach  : false,
+            describe   : false,
+            xdescribe  : false
+          }
+        },
+        files: { src: [ 'test/**/*.js' ] }
+      }
     },
 
     jasmine_node: {
@@ -37,6 +64,6 @@ module.exports = function(grunt) {
 
 
   grunt.registerTask('jasmine', ['jasmine_node']);
-  grunt.registerTask('test',    ['jshint']);
+  grunt.registerTask('test',    ['jshint', 'jasmine']);
 
 };
