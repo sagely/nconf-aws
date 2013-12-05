@@ -57,7 +57,7 @@ describe('Testing the awsinstance store', function(){
     nconf.remove('awsinstance');
   });
 
-  it('should load all instance metadata properties', function() {
+  it('should load all instance metadata properties.', function() {
     runs(function() {
       nconf.add('awsinstance');
       nconf.load(function(err) {
@@ -86,7 +86,7 @@ describe('Testing the awsinstance store', function(){
     });
   });
 
-  it('should load only two metadata properties on the whitelist', function() {
+  it('should load only two metadata properties on the whitelist.', function() {
     runs(function() {
       nconf.add('awsinstance', [ 'region', 'instanceId' ]);
       nconf.load(function(err) {
@@ -113,6 +113,56 @@ describe('Testing the awsinstance store', function(){
       expect(nconf.get("devpayProductCodes")).toBeUndefined();
       expect(nconf.get("privateIp")).toBeUndefined();
       expect(nconf.get("availabilityZone")).toBeUndefined();
+    });
+  });
+
+  it('should load only whitelisted properties using a full options object.', function() {
+    runs(function() {
+      nconf.add('awsinstance', { whitelist: [ 'privateIp', 'version' ] });
+      nconf.load(function(err) {
+        expect(err).toBeFalsy();
+        loaded = true;
+      });
+    });
+
+    waitsFor(function() { return loaded; });
+
+    runs(function() {
+      expect(nconf.get("version")).toEqual("2010-08-31");
+      expect(nconf.get("privateIp")).toEqual("172.31.27.149");
+
+      expect(nconf.get("instanceId")).toBeUndefined();
+      expect(nconf.get("billingProducts")).toBeUndefined();
+      expect(nconf.get("accountId")).toBeUndefined();
+      expect(nconf.get("imageId")).toBeUndefined();
+      expect(nconf.get("kernelId")).toBeUndefined();
+      expect(nconf.get("ramdiskId")).toBeUndefined();
+      expect(nconf.get("architecture")).toBeUndefined();
+      expect(nconf.get("instanceType")).toBeUndefined();
+      expect(nconf.get("pendingTime")).toBeUndefined();
+      expect(nconf.get("region")).toBeUndefined();
+      expect(nconf.get("devpayProductCodes")).toBeUndefined();
+      expect(nconf.get("availabilityZone")).toBeUndefined();
+    });
+  });
+
+  it('should use the supplied prefix.', function() {
+    runs(function() {
+      nconf.add('awsinstance', { whitelist: [ 'imageId', 'devpayProductCodes' ], prefix: 'aws_' });
+      nconf.load(function(err) {
+        expect(err).toBeFalsy();
+        loaded = true;
+      });
+    });
+
+    waitsFor(function() { return loaded; });
+
+    runs(function() {
+      expect(nconf.get("aws_imageId")).toEqual("ami-ec53c8dc");
+      expect(nconf.get("aws_devpayProductCodes")).toBeNull();
+
+      expect(nconf.get("imageId")).toBeUndefined();
+      expect(nconf.get("devpayProductCodes")).toBeUndefined();
     });
   });
 });
