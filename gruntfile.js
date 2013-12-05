@@ -40,17 +40,8 @@ module.exports = function(grunt) {
     },
 
     jasmine_node: {
-      options: {
-        specNameMatcher: "./test/unit/*", // load only specs containing specNameMatcher
-        projectRoot: "./test/unit/",
-        requirejs: false,
-        forceExit: true,
-        jUnit: {
-          report: false,
-          savePath : "./test/reports/jasmine/",
-          useDotNotation: true,
-          consolidate: true
-        }
+      unit: {
+        specFolders: [ './test/unit/' ]
       }
     },
 
