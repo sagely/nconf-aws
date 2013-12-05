@@ -23,5 +23,5 @@
     "grunt-jasmine-node": "0.1.0",
     "sinon": "1.7.3"
   },
-  "main": "./index.js"
+  "main": "./lib/index.js"
 }

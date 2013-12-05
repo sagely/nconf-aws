@@ -13,7 +13,7 @@ module.exports = function(grunt) {
         node: true
       },
       pkg: {
-        files: { src: [ '*.js' ] }
+        files: { src: [ 'lib/**/*.js' ] }
       },
       test: {
         options: {
@@ -35,14 +35,14 @@ module.exports = function(grunt) {
             xdescribe  : false
           }
         },
-        files: { src: [ 'test/**/*.js' ] }
+        files: { src: [ 'test/unit/**/*.js' ] }
       }
     },
 
     jasmine_node: {
       options: {
-        specNameMatcher: "./test/jasmine/*", // load only specs containing specNameMatcher
-        projectRoot: "./test/jasmine/",
+        specNameMatcher: "./test/unit/*", // load only specs containing specNameMatcher
+        projectRoot: "./test/unit/",
         requirejs: false,
         forceExit: true,
         jUnit: {

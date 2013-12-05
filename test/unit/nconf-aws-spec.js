@@ -3,7 +3,7 @@
 'use strict';
 
 var nconf = require('nconf'),
-    nconf_aws = require('../index'),
+    nconf_aws = require('../../lib/index'),
     sinon = require('sinon'),
     AWS = require('aws-sdk');
 
