@@ -3,115 +3,60 @@
 'use strict';
 
 var nconf = require('nconf'),
-    nconf_aws = require('../../lib/index'),
     sinon = require('sinon'),
-    AWS = require('aws-sdk');
+    proxyquire = require('proxyquire'),
+    AWS = require('node-aws-mock');
+
+var nconf_aws = proxyquire('../../lib/index', { 'aws-sdk': AWS });
 
 //-----------------------------------------------------------------------------//
 // Stub Setup
 //-----------------------------------------------------------------------------//
 
-/**
- * Set up a sinon stub for the AWS Metadata service.
- **/
-var meta = new AWS.MetadataService();
-sinon.stub(AWS, 'MetadataService', function() {
-  return {
-    request: function(path, callback) {
-      if (path === '/latest/dynamic/instance-identity/document') {
-        // return a sample set of metadata
-        callback(null, JSON.stringify({
-          "instanceId" : "i-fed232c9",
-          "billingProducts" : null,
-          "accountId" : "788731124032",
-          "imageId" : "ami-ec53c8dc",
-          "kernelId" : "aki-fc37bacc",
-          "ramdiskId" : null,
-          "architecture" : "x86_64",
-          "instanceType" : "m1.medium",
-          "pendingTime" : "2013-11-20T01:21:27Z",
-          "region" : "us-west-2",
-          "version" : "2010-08-31",
-          "devpayProductCodes" : null,
-          "privateIp" : "172.31.27.149",
-          "availabilityZone" : "us-west-2b"     
-        }));
-      } else {
-        callback('Not found');
-      }
-    },
-    loadCredentials: meta.loadCredentials
-  };
-});
+AWS.MetadataService.addPath('/latest/dynamic/instance-identity/document', JSON.stringify({
+  "instanceId" : "i-fed232c9",
+  "billingProducts" : null,
+  "accountId" : "788731124032",
+  "imageId" : "ami-ec53c8dc",
+  "kernelId" : "aki-fc37bacc",
+  "ramdiskId" : null,
+  "architecture" : "x86_64",
+  "instanceType" : "m1.medium",
+  "pendingTime" : "2013-11-20T01:21:27Z",
+  "region" : "us-west-2",
+  "version" : "2010-08-31",
+  "devpayProductCodes" : null,
+  "privateIp" : "172.31.27.149",
+  "availabilityZone" : "us-west-2b"     
+}));
 
-/**
- * Set up a sinon stub for the AWS S3 service.
- **/
-sinon.stub(AWS, 'S3', function(options) {
-  return {
-    getObject: function(options, callback) {
-      if (options.Bucket === 'config.goonies3.com' && options.Key === 'development/config.json') {
-        // test S3 json object
-        var s3_json = {
-          "port": "3000",
-          "log_folder": "logs",
-          "log_level": "info",
-          "loggly": {
-            "level": "info",
-            "json": true,
-            "subdomain": "goonies3",
-            "inputToken": "my-token"
-          }
-        };
+AWS.EC2.addTag('i-fed232c9', 'instance', 'Name', 'Inferno (Development Server)');
+AWS.EC2.addTag('i-fed232c9', 'instance', 'Test', 'This is a test');
+AWS.EC2.addTag('i-fed232c9', 'instance', 'Another', 'This is another test');
 
-        callback(null, { Body: JSON.stringify(s3_json) });
-      } else if (options.Bucket === 'config.goonies3.com' && options.Key === 'development/config_invalid.json') {
-        callback(null, { Body: '{ InvalidJSON: Test }' });
-      } else {
-        callback('404', null);
-        return;
-      }
-    }
-  };
-});
-
-/**
- * Set up a sinon stub for the AWS EC2 service.
- **/
-sinon.stub(AWS, 'EC2', function(options) {
-  return {
-    describeTags: function(options, callback) {
-      // make sure the instanceId is correct
-      var id_opts = options.Filters ? options.Filters.filter(function(val) {
-        return val.Name === 'resource-id';
-      }) : [];
-      if (id_opts.length > 0 && id_opts[0].Values[0] === 'i-fed232c9') {
-        callback(null, {
-          Tags: [
-            { ResourceId: 'i-fed232c9',
-              ResourceType: 'instance',
-              Key: 'Name',
-              Value: 'Inferno (Development Server)'
-            },
-            { ResourceId: 'i-fed232c9',
-              ResourceType: 'instance',
-              Key: 'Test',
-              Value: 'This is a test'
-            },
-            { ResourceId: 'i-fed232c9',
-              ResourceType: 'instance',
-              Key: 'Another',
-              Value: 'This is another test'
-            }
-          ],
-          requestId: '0c164999-4526-4e88-80db-1493982b3fae'
-        });
-      } else {
-        callback('Invalid instance ID');
-      }
-    }
-  };
-});
+AWS.S3.addBucket('config.goonies3.com');
+var s3_json = {
+  "port": "3000",
+  "log_folder": "logs",
+  "log_level": "info",
+  "loggly": {
+    "level": "info",
+    "json": true,
+    "subdomain": "goonies3",
+    "inputToken": "my-token"
+  }
+};
+var s3 = new AWS.S3();
+s3.putObject({
+  Bucket: 'config.goonies3.com',
+  Key: 'development/config.json',
+  Body: JSON.stringify(s3_json)
+}, function() { });
+s3.putObject({
+  Bucket: 'config.goonies3.com',
+  Key: 'development/config_invalid.json',
+  Body: '{ InvalidJSON: Test }'
+}, function() { });
 
 //-----------------------------------------------------------------------------//
 // Test Specs

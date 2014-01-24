@@ -21,6 +21,8 @@
     "grunt-contrib-clean": "0.5.0",
     "grunt-contrib-jshint": "0.7.2",
     "grunt-jasmine-node": "git+ssh://git@github.com:TeamPraxis/grunt-jasmine-node",
+    "node-aws-mock": "git+ssh://git@github.com:TeamPraxis/node-aws-mock",
+    "proxyquire": "0.5.2",
     "sinon": "1.7.3"
   },
   "main": "./lib/index.js"
